@@ -1,0 +1,97 @@
+:root {
+  --bg-color: #0d2b45;
+  --primary-color: #ffaa5e;
+  --secondary-color: #ffd4a3;
+  --text-color: #ffecd6;
+  --accent-color: #8d697a;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "Press Start 2P", cursive;
+  background-color: var(--bg-color);
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.logo-image {
+  max-width: 300px;
+  margin: 20px 0;
+}
+
+input[type="file"] {
+  margin: 20px 0;
+  color: var(--primary-color);
+  border: 2px dashed var(--primary-color);
+  padding: 10px;
+  width: 100%;
+  background-color: transparent;
+}
+
+#now-playing {
+  margin: 20px 0;
+  min-height: 24px;
+  color: var(--secondary-color);
+}
+
+#audio-player {
+  width: 100%;
+  margin-top: 10px;
+}
+
+#playlist {
+  list-style: none;
+  padding: 0;
+}
+
+#playlist li {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid var(--primary-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#playlist li:hover {
+  background-color: rgba(255, 170, 94, 0.1);
+}
+
+#playlist li.playing {
+  background-color: var(--secondary-color);
+  color: var(--bg-color);
+  transform: scale(1.02);
+}
+
+.shortcut-hint {
+  padding: 10px;
+  margin: 20px auto;
+  max-width: 400px;
+  font-size: 14px;
+  text-align: left;
+  color: var(--text-color);
+}
+
+.shortcut-hint ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shortcut-hint li {
+  margin: 5px 0;
+}
+
+.shortcut-hint kbd {
+  background-color: var(--accent-color);
+  padding: 2px 6px;
+  margin-right: 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  display: inline-block;
+}

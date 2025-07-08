@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mix_tape.mp3</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>mix_tape.mp3</h1>
+      <img src="mix-tape.png" alt="mix-tape" class="logo-image" />
+      <input type="file" id="fileInput" multiple accept="audio/*" />
+      <div id="now-playing">drop a track to begin!</div>
+      <audio id="audio-player" controls></audio>
+      <ul id="playlist"></ul>
+      <div class="shortcut-hint">
+        <p><strong>Controls:</strong></p>
+        <ul>
+          <li><kbd>Space</kbd> — play / pause</li>
+          <li><kbd>←</kbd> <kbd>→</kbd> — switch song</li>
+          <li><kbd>D</kbd> — delete song</li>
+          <li><kbd>S</kbd> — shuffle</li>
+        </ul>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
