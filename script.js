@@ -3,9 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const playlist = document.getElementById("playlist");
   const audioPlayer = document.getElementById("audio-player");
   const nowPlayingDisplay = document.getElementById("now-playing");
+  const modal = document.getElementById("confirm-modal");
+  const confirmYes = document.getElementById("confirm-yes");
+  const confirmNo = document.getElementById("confirm-no");
 
   let uploadedTracks = [];
   let currentTrackIndex = -1;
+  let pendingDeleteIndex = null;
 
   fileInput.addEventListener("change", function () {
     const files = Array.from(this.files);
@@ -90,6 +94,36 @@ document.addEventListener("DOMContentLoaded", function () {
     playTrack(0);
   }
 
+  confirmYes.addEventListener("click", () => {
+    if (pendingDeleteIndex !== null) {
+      uploadedTracks.splice(pendingDeleteIndex, 1);
+
+      if (uploadedTracks.length > 0) {
+        const next = Math.min(pendingDeleteIndex, uploadedTracks.length - 1);
+        playTrack(next);
+      } else {
+        audioPlayer.src = "";
+        nowPlayingDisplay.textContent = "silence...";
+        currentTrackIndex = -1;
+      }
+
+      renderPlaylist();
+    }
+    closeModal();
+  });
+
+  confirmNo.addEventListener("click", closeModal);
+
+  function openModal(index) {
+    pendingDeleteIndex = index;
+    modal.classList.remove("hidden");
+  }
+
+  function closeModal() {
+    pendingDeleteIndex = null;
+    modal.classList.add("hidden");
+  }
+
   // key controls
   document.addEventListener("keydown", (e) => {
     if (uploadedTracks.length === 0) return;
@@ -113,15 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       case "KeyD":
         if (currentTrackIndex >= 0) {
-          uploadedTracks.splice(currentTrackIndex, 1);
-          if (uploadedTracks.length > 0) {
-            playTrack(Math.min(currentTrackIndex, uploadedTracks.length - 1));
-          } else {
-            audioPlayer.src = "";
-            nowPlayingDisplay.textContent = "silence...";
-            currentTrackIndex = -1;
-          }
-          renderPlaylist();
+          openModal(currentTrackIndex);
         }
         break;
 
