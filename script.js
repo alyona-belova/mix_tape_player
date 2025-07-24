@@ -15,30 +15,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const files = Array.from(this.files);
     if (files.length === 0) return;
 
-    files.forEach((file) => {
-      const trackName = file.name.replace(/\.[^/.]+$/, "");
-      const exists = uploadedTracks.some((track) => track.name === trackName);
-      if (!exists) {
-        const track = {
-          name: trackName,
-          url: URL.createObjectURL(file),
-        };
-        uploadedTracks.push(track);
-      } else {
-        alert(`"${trackName}" is already in the playlist!`);
-      }
-    });
-    renderPlaylist();
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
 
-    if (currentTrackIndex === -1 && uploadedTracks.length > 0) {
-      playTrack(0);
-    }
+    fetch("http://localhost:8080/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then(() => {
+        loadPlaylistFromServer();
+      })
+      .catch((err) => {
+        console.error("Upload failed", err);
+      });
+
     this.value = "";
   });
 
   function renderPlaylist() {
     playlist.innerHTML = "";
-
+    const fragment = document.createDocumentFragment();
     uploadedTracks.forEach((track, index) => {
       const li = document.createElement("li");
       li.textContent = track.name;
@@ -47,13 +44,17 @@ document.addEventListener("DOMContentLoaded", function () {
       if (index === currentTrackIndex) {
         li.classList.add("playing");
       }
-
-      playlist.appendChild(li);
+      fragment.appendChild(li);
     });
+    playlist.appendChild(fragment);
   }
 
   function playTrack(index) {
-    if (index >= 0 && index < uploadedTracks.length) {
+    if (
+      index >= 0 &&
+      index < uploadedTracks.length &&
+      currentTrackIndex !== index
+    ) {
       currentTrackIndex = index;
       const track = uploadedTracks[index];
 
@@ -74,41 +75,58 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
   function shufflePlay() {
-    if (uploadedTracks.length <= 1) return;
+    fetch("http://localhost:8080/shuffle")
+      .then((res) => res.json())
+      .then((tracks) => {
+        uploadedTracks = tracks.map((track) => ({
+          name: track.filename,
+          url: `http://localhost:8080${track.path}`,
+        }));
+        renderPlaylist();
 
-    const currentTrack = uploadedTracks[currentTrackIndex];
-    shuffleArray(uploadedTracks);
-    if (currentTrack) {
-      currentTrackIndex = uploadedTracks.findIndex(
-        (track) => track.name === currentTrack.name
-      );
-    }
-    renderPlaylist();
-    playTrack(0);
+        if (uploadedTracks.length > 0) {
+          currentTrackIndex = -1;
+          playTrack(0);
+        }
+      })
+      .catch((err) => console.error("Shuffle failed:", err));
   }
 
   confirmYes.addEventListener("click", () => {
     if (pendingDeleteIndex !== null) {
-      uploadedTracks.splice(pendingDeleteIndex, 1);
+      const trackToRemove = uploadedTracks[pendingDeleteIndex]; // ✅ Define it here
 
-      if (uploadedTracks.length > 0) {
-        const next = Math.min(pendingDeleteIndex, uploadedTracks.length - 1);
-        playTrack(next);
-      } else {
-        audioPlayer.src = "";
-        nowPlayingDisplay.textContent = "silence...";
-        currentTrackIndex = -1;
-      }
+      fetch(
+        `http://localhost:8080/song/${encodeURIComponent(trackToRemove.name)}`,
+        {
+          method: "DELETE",
+        }
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to delete from server");
+          }
 
-      renderPlaylist();
+          uploadedTracks.splice(pendingDeleteIndex, 1);
+
+          if (uploadedTracks.length > 0) {
+            const next = Math.min(
+              pendingDeleteIndex,
+              uploadedTracks.length - 1
+            );
+            playTrack(next);
+          } else {
+            audioPlayer.src = "";
+            nowPlayingDisplay.textContent = "silence...";
+            currentTrackIndex = -1;
+          }
+
+          renderPlaylist();
+        })
+        .catch((err) => console.error("Delete failed", err));
     }
+
     closeModal();
   });
 
@@ -123,6 +141,28 @@ document.addEventListener("DOMContentLoaded", function () {
     pendingDeleteIndex = null;
     modal.classList.add("hidden");
   }
+
+  function loadPlaylistFromServer(shuffle = false) {
+    const url = shuffle
+      ? "http://localhost:8080/shuffle"
+      : "http://localhost:8080/playlist";
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((tracks) => {
+        uploadedTracks = tracks.map((track) => ({
+          name: track.filename,
+          url: `http://localhost:8080${track.path}`,
+        }));
+        renderPlaylist();
+        if (uploadedTracks.length > 0 && currentTrackIndex === -1) {
+          playTrack(0);
+        }
+      })
+      .catch((err) => console.error("Failed to load playlist", err));
+  }
+
+  loadPlaylistFromServer();
 
   // key controls
   document.addEventListener("keydown", (e) => {

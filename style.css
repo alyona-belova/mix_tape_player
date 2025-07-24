@@ -55,11 +55,11 @@ input[type="file"] {
   padding: 10px;
   border: 1px solid var(--primary-color);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 #playlist li:hover {
-  background-color: rgba(255, 170, 94, 0.1);
+  background-color: var(--secondary-color);
 }
 
 #playlist li.playing {

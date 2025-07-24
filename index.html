@@ -15,7 +15,7 @@
       <h1>mix_tape.mp3</h1>
       <img src="mix-tape.png" alt="mix-tape" class="logo-image" />
       <input type="file" id="fileInput" multiple accept="audio/*" />
-      <div id="now-playing">drop a track to begin!</div>
+      <div id="now-playing" aria-live="polite">drop a track to begin!</div>
       <audio id="audio-player" controls></audio>
       <ul id="playlist"></ul>
       <div class="shortcut-hint">
@@ -35,6 +35,6 @@
         <button id="confirm-no">NO</button>
       </div>
     </div>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
   </body>
 </html>
